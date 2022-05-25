@@ -78,7 +78,7 @@
 <div class="register-box">
 <div class="card card-outline card-primary">
 <div class="card-header text-center">
-<a href="../../index2.html" class="h1"><b style="color:#3F65B0;">TINY</b>media</a>
+<a href="#" class="h1"><b style="color:#3F65B0;">TINY</b>media</a>
 </div>
 <div class="card-body">
 <p class="login-box-msg">Register a new membership</p>

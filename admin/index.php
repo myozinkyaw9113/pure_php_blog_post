@@ -6,6 +6,12 @@
     header('Location: ../login.php');
   }
 
+  if ($_SESSION) {
+    if ($_SESSION['user_id'] != 1) {
+      header('Location: ../users/index.php');
+    }
+  }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
