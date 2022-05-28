@@ -1,5 +1,5 @@
 <?php 
-  require 'config/config.php';
+  require 'config/database.php';
   
   $name = $email = $password = $c_password = "";
   $nameErr = $emailErr = $passwordErr = $c_passwordErr = $confirmPassErr = "";

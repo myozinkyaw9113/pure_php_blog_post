@@ -1,6 +1,6 @@
 <?php
   session_start();
-  require '../config/config.php';
+  require '../config/database.php';
   require 'top.php';
 
   if (empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
@@ -13,7 +13,7 @@
     }
   }
 
-  $pdo_prepare = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
+  $pdo_prepare = $pdo->prepare("SELECT * FROM posts ORDER BY postId DESC");
   $pdo_prepare->execute();
   $result = $pdo_prepare->fetchAll();
 
@@ -65,7 +65,7 @@
                   <tr>
                     <td><?php echo $num++; ?></td>
                     <td><?php echo substr($result[$i]['content'], 0, 70). '...'; ?></td>
-                    <td><?php echo $result[$i]['user_id'] ;?></td>
+                    <td><?php echo $result[$i]['author_id'] ;?></td>
                     <td>
                       <div class="d-flex gap-1">
                         <a href="#" class="btn-sm btn-warning"><i class='bx bx-message-alt-detail'></i></a>

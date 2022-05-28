@@ -1,6 +1,6 @@
 <?php 
     session_start();
-    require 'config/config.php';
+    require 'config/database.php';
 
     $email = $password = "";
     $emailErr = $passwordErr = $invalidUser = $incorrectPassword = "";

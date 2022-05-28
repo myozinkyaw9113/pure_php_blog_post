@@ -1,55 +1,67 @@
-    <!-- create post -->
-    <div class="bg-white p-3 mt-3 rounded border shadow">
-        <!-- avatar -->
-        <div class="d-flex" type="button">
-        <div class="p-1">
-            <img
-            src="https://source.unsplash.com/collection/happy-people"
-            alt="avatar"
-            class="rounded-circle me-2"
-            style="width: 38px; height: 38px; object-fit: cover"
-            />
-        </div>
-        <input
-            type="text"
-            class="form-control rounded-pill border-0 bg-gray pointer"
-            disabled
-            placeholder="What's on your mind, <?php echo $thisUser['name']; ?>?"
-            data-bs-toggle="modal"
-            data-bs-target="#createModal"
-        />
-        </div>
-        <!-- create modal -->
-        <div
-        class="modal fade"
-        id="createModal"
-        tabindex="-1"
-        aria-labelledby="createModalLabel"
-        aria-hidden="true"
-        data-bs-backdrop="false"
-        >
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-            <!-- head -->
-            <div class="modal-header align-items-center">
+<?php
+    session_start();
+    date_default_timezone_set("Asia/Rangoon");
+    require '../config/database.php';
+    $postprivacyconfig = require '../config/postprivacy.php';
+    $postprivacyicon = require '../config/postprivacyicon.php';
+
+    
+    
+    // echo $checkExitImg;
+    // exit();
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $checkExitImg = 'images/'. $oldPost[0]['img'];
+        if (file_exists($checkExitImg)) {
+            echo $checkExitImg;
+            exit();
+        } else {
+            echo 'No photo';
+            exit();
+        }
+    } else {
+        $pdo_prepare = $pdo->prepare("SELECT * FROM posts WHERE postId=".$_GET['id']);
+        $pdo_prepare->execute();
+        $oldPost = $pdo_prepare->fetchAll();
+    }
+?>
+
+<?php
+    require 'top.php';
+    require 'appbar.php';
+?>
+
+<style>
+    .editpoststyle {
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        top: 6rem;
+    }
+</style>
+
+<!-- ================= Main ================= -->
+<div class="container-fluid d-flex justify-content-center position-absolute">
+
+    <div class="row justify-content-evenly w-50 editpoststyle position-relative">
+        <!-- head -->
+        <div class="modal-header align-items-center">
                 <h5
                 class="text-dark text-center w-100 m-0"
-                id="exampleModalLabel"
                 >
-                Create Post
+                Edit Post
                 </h5>
-                <button
-                type="button"
+                <a
+                href="index.php"
                 class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                ></button>
+                ></a>
             </div>
             <!-- body -->
             <div class="modal-body">
                 <div class="my-1 p-1">
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" enctype="multipart/form-data">
-
+                    <?php 
+                        foreach ($oldPost as $oldPostValue) {
+                            # code...
+                    ?>
                         <div class="d-flex flex-column">
                             <!-- name -->
                             <div class="d-flex align-items-center">
@@ -66,7 +78,7 @@
                                 />
                             </div>
                             <div>
-                                <p class="m-0 fw-bold"><?php echo $thisUser['name'] ?></p>
+                                <p class="m-0 fw-bold"><?php  ?></p>
                                 <select
                                 class="form-select border-0 bg-gray w-75 fs-7"
                                 aria-label="Default select example"
@@ -75,7 +87,9 @@
                                     <?php 
                                         foreach($postprivacyconfig as $key => $value) {
                                     ?>
-                                        <option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                        <option value="<?php echo $key ?>" <?php if($key == $oldPostValue['postprivacy']) { echo 'selected'; } ?>>
+                                            <?php echo $value; ?>
+                                        </option>
                                     <?php
                                         }
                                     ?>
@@ -84,19 +98,23 @@
                             </div>
                             <!-- text -->
                             <div>
+                                <input type="hidden" name="id" value="<?php echo $oldPostValue['postId'] ?>">
                                 <textarea
                                     name="content"
                                     cols="30"
                                     rows="5"
                                     class="form-control border-0"
                                     style="border:none;outline:none;resize:none;font-size: 1.3rem;"
-                                ></textarea>
+                                    placeholder=""
+                                ><?php echo $oldPostValue['content'] ?></textarea>
+
                                 <!-- emoji  -->
                                 <div
                                 class="
                                     d-flex
                                     justify-content-between
                                     align-items-center
+                                    mt-3
                                 "
                                 >
                                 <img
@@ -121,7 +139,6 @@
                                     border border-1 border-light
                                     rounded
                                     p-3
-                                    mt-3
                                 "
                                 >
                                 <p class="m-0">Add to your post</p>
@@ -188,64 +205,25 @@
                                         ></i>
                                     </div>
                                 </div>
-                                <input type="file" name="createImg" />
-                                <input type="submit" name="submit" value="Post" class="btn btn-primary w-100">
+                                <div class="my-2 d-flex justify-content-between align-items-center">
+                                    <input type="file" name="createImg" />
+                                    <img src="images/<?php echo $oldPostValue['img'] ?>" style="width:auto;height:100px;" alt="">
+                                </div>
+                                <input type="submit" name="submit" value="Save" class="btn btn-primary w-100">
                             </div>
                         </div>
+                    <?php
+                        }
+                    ?>
                     </form>
                 </div>
 
                 <!-- end -->
             </div>
-            </div>
-        </div>
-        </div>
-        <hr />
-        <!-- actions -->
-        <div class="d-flex flex-column flex-lg-row mt-3">
-        <!-- a 1 -->
-        <div
-            class="
-            dropdown-item
-            rounded
-            d-flex
-            align-items-center
-            justify-content-center
-            "
-            type="button"
-        >
-            <i class="fas fa-video me-2 text-danger"></i>
-            <p class="m-0 text-muted">Live Video</p>
-        </div>
-        <!-- a 2 -->
-        <div
-            class="
-            dropdown-item
-            rounded
-            d-flex
-            align-items-center
-            justify-content-center
-            "
-            type="button"
-            data-bs-toggle="modal"
-            data-bs-target="#createModal"
-        >
-            <i class="fas fa-photo-video me-2 text-success"></i>
-            <p class="m-0 text-muted">Photo/Video</p>
-        </div>
-        <!-- a 3 -->
-        <div
-            class="
-            dropdown-item
-            rounded
-            d-flex
-            align-items-center
-            justify-content-center
-            "
-            type="button"
-        >
-            <i class="fas fa-smile me-2 text-warning"></i>
-            <p class="m-0 text-muted">Feeling/Activity</p>
-        </div>
-        </div>
     </div>
+
+</div>
+
+    <!-- create modal 918119602 7222 -->
+
+<?php require 'base.php'; ?>
