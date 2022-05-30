@@ -23,31 +23,47 @@
     $content = $img = $needErr = "";
 
     if ($_POST) {
-        $file = 'images/'.basename($_FILES['createImg']['name']);
-        $imageType = pathinfo($file,PATHINFO_EXTENSION);
+        $postprivacy = $_POST['postprivacy'];
+        $content = $_POST['content'];
+        if ($_FILES['createImg']['name'] != null) {
+            $file = 'images/'.basename($_FILES['createImg']['name']);
+            $imageType = pathinfo($file,PATHINFO_EXTENSION);
 
-        if ($imageType != 'png' && $imageType != 'jpg' && $imageType != 'jpeg' && $imageType != 'gif') {
-            echo "<script>alert('Image must be png,jpg,jpeg,gif')</script>";
+            if ($imageType != 'png' && $imageType != 'jpg' && $imageType != 'jpeg' && $imageType != 'gif') {
+                echo "<script>alert('Image must be png,jpg,jpeg,gif')</script>";
+            } else {
+                
+                $image = $_FILES['createImg']['name'];
+                move_uploaded_file($_FILES['createImg']['tmp_name'],$file);
+
+                $stmt = $pdo->prepare("INSERT INTO posts(postprivacy,content,img,author_id) 
+                                    VALUES (:postprivacy,:content,:img,:author_id)");
+                $result = $stmt->execute(
+                    array(
+                        ':postprivacy' => $postprivacy,
+                        ':content'=>$content,
+                        ':author_id'=>$_SESSION['user_id'],
+                        ':img'=>$image
+                    )
+                );
+                if ($result) {
+                    echo "<script>alert('Successfully added');window.location.href='index.php';</script>";
+                }
+            }
         } else {
-            $postprivacy = $_POST['postprivacy'];
-            $content = $_POST['content'];
-            $image = $_FILES['createImg']['name'];
-            move_uploaded_file($_FILES['createImg']['tmp_name'],$file);
-
-            $stmt = $pdo->prepare("INSERT INTO posts(postprivacy,content,img,author_id) 
-                                VALUES (:postprivacy,:content,:img,:author_id)");
+            $stmt = $pdo->prepare("INSERT INTO posts(postprivacy,content,author_id) 
+                                VALUES (:postprivacy,:content,:author_id)");
             $result = $stmt->execute(
                 array(
                     ':postprivacy' => $postprivacy,
                     ':content'=>$content,
                     ':author_id'=>$_SESSION['user_id'],
-                    ':img'=>$image
                 )
             );
             if ($result) {
                 echo "<script>alert('Successfully added');window.location.href='index.php';</script>";
             }
-        } 
+        }
     }
     
     function test_input($data) {
@@ -59,9 +75,9 @@
 ?>
 
 <?php
-    require 'top.php';
-    require 'appbar.php';
-    require 'chat.php';
+    require 'app/top.php';
+    require 'app/appbar.php';
+    require 'app/chat.php';
 ?>
 
     <!-- ================= Main ================= -->
@@ -70,7 +86,7 @@
       <div class="row justify-content-evenly">
       
         <!-- ================= Left Sidebar ================= -->
-        <?php require 'leftsidebar.php'; ?>
+        <?php require 'app/leftsidebar.php'; ?>
 
         <!-- ================= Timeline ================= -->
         <div class="col-12 col-lg-6 pb-5">
@@ -80,13 +96,13 @@
             >
 
                 <!-- ================= Stories ================= -->
-                <?php require 'stories.php'; ?>
+                <?php require 'app/stories.php'; ?>
 
                 <!-- ================= Create Post ================= -->
                 <?php require 'createpost.php'; ?>
                 
                 <!-- ================= Create Room ================= -->
-                <?php require 'createroom.php'; ?>
+                <?php require 'app/createroom.php'; ?>
                 
                 <!-- posts -->
                 <!-- p 1 -->
@@ -157,7 +173,8 @@
                             align-items-center
                             fs-7
                             "
-                            href="#"
+                            href="deletepost.php?id=<?php echo $value['postId'] ?>"
+                            onclick="return confirm('Are you sure you want to delete this post?');"
                         >
                             Delete Post</a
                         >
@@ -171,11 +188,17 @@
                         <p>
                         <?php echo $value['content']; ?>
                         </p>
+                        <?php 
+                            if ($value['img'] != null) {
+                        ?>
                         <img
                         src="images/<?php echo $value['img']; ?>"
                         alt="post image"
                         class="img-fluid rounded"
-                        />
+                        />   
+                        <?php
+                            }
+                        ?>
                     </div>
                     <!-- likes & comments -->
                     <div class="post__comment mt-3 position-relative">
@@ -391,7 +414,7 @@
         </div>
         
         <!-- ================= Right Sidebar ================= -->
-        <?php require 'rightsidebar.php'; ?>
+        <?php require 'app/rightsidebar.php'; ?>
 
       </div>
 
@@ -408,4 +431,4 @@
       <i class="fas fa-edit bg-white rounded-circle p-3 shadow"></i>
     </div>
 
-<?php require 'base.php'; ?>
+<?php require 'app/base.php'; ?>

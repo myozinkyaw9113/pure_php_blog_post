@@ -5,29 +5,58 @@
     $postprivacyconfig = require '../config/postprivacy.php';
     $postprivacyicon = require '../config/postprivacyicon.php';
 
-    
-    
-    // echo $checkExitImg;
-    // exit();
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $checkExitImg = 'images/'. $oldPost[0]['img'];
-        if (file_exists($checkExitImg)) {
-            echo $checkExitImg;
-            exit();
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $id = $_POST['id'];
+        $postprivacy = $_POST['postprivacy'];
+        $content = $_POST['content'];
+        if ($_FILES['updateImg']['name'] != null) {
+            $stmt = $pdo->prepare("SELECT * FROM posts WHERE postId =$id");
+            $stmt->execute();
+            $oldPost = $stmt->fetchAll();
+
+            $checkImg = 'images/'. $oldPost[0]['img'];
+            if (file_exists($checkImg)) {
+                unlink($checkImg);
+                $newfile = 'images/'.basename($_FILES['updateImg']['name']);
+                $imageType = pathinfo($newfile,PATHINFO_EXTENSION);
+        
+                if ($imageType != 'png' && $imageType != 'jpg' && $imageType != 'jpeg' && $imageType != 'gif') {
+                    echo "<script>alert('Image must be png,jpg,jpeg,gif')</script>";
+                } else {
+                    $newImage = $_FILES['updateImg']['name'];
+                    move_uploaded_file($_FILES['updateImg']['tmp_name'],$newfile);
+        
+                    $stmt = $pdo->prepare("UPDATE posts SET 
+                    postprivacy='$postprivacy',content='$content',img='$newImage' WHERE postId='$id'");
+                    $result = $stmt->execute();
+                    if ($result) {
+                        echo "<script>alert('Successfully Update');window.location.href='index.php';</script>";
+                    }
+                } 
+            }
+            
         } else {
-            echo 'No photo';
-            exit();
+            $stmt = $pdo->prepare("UPDATE posts SET 
+            postprivacy='$postprivacy',content='$content' WHERE postId='$id'");
+            $result = $stmt->execute();
+            if ($result) {
+                echo "<script>alert('Successfully Update');window.location.href='index.php';</script>";
+            }
         }
+
     } else {
-        $pdo_prepare = $pdo->prepare("SELECT * FROM posts WHERE postId=".$_GET['id']);
-        $pdo_prepare->execute();
-        $oldPost = $pdo_prepare->fetchAll();
+        $stmt = $pdo->prepare('SELECT * FROM posts WHERE postId = :id');
+        $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT); // <-- filter your data first (see [Data Filtering](#data_filtering)), especially important for INSERT, UPDATE, etc.
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT); // <-- Automatically sanitized for SQL by PDO
+        $stmt->execute();
+        $oldPost = $stmt->fetchAll();
     }
+
 ?>
 
 <?php
-    require 'top.php';
-    require 'appbar.php';
+    require 'app/top.php';
+    require 'app/appbar.php';
 ?>
 
 <style>
@@ -206,8 +235,14 @@
                                     </div>
                                 </div>
                                 <div class="my-2 d-flex justify-content-between align-items-center">
-                                    <input type="file" name="createImg" />
+                                    <input type="file" name="updateImg" />
+                                    <?php
+                                        if ($oldPostValue['img'] != null) {
+                                    ?>
                                     <img src="images/<?php echo $oldPostValue['img'] ?>" style="width:auto;height:100px;" alt="">
+                                    <?php
+                                        }      
+                                    ?>
                                 </div>
                                 <input type="submit" name="submit" value="Save" class="btn btn-primary w-100">
                             </div>
@@ -226,4 +261,4 @@
 
     <!-- create modal 918119602 7222 -->
 
-<?php require 'base.php'; ?>
+<?php require 'app/base.php'; ?>
