@@ -13,9 +13,39 @@
     }
   }
 
-  $pdo_prepare = $pdo->prepare("SELECT * FROM posts ORDER BY postId DESC");
-  $pdo_prepare->execute();
-  $result = $pdo_prepare->fetchAll();
+  # Pagination 
+  # p = $pageno;
+  $p = '';
+  if (!empty($_GET['p'])) {
+    $p = $_GET['p'];
+  } else {
+    $p = 1;
+  }
+  $showrecs = 2;
+  $offset = ($p - 1) * $showrecs;
+
+  if (empty($_POST['search'])) {
+    $pdo_prepare = $pdo->prepare("SELECT * FROM posts ORDER BY postId DESC");
+    $pdo_prepare->execute();
+    $raw_result = $pdo_prepare->fetchAll();
+
+    $total_pages = ceil(count($raw_result) / $showrecs);
+
+    $pdo_prepare = $pdo->prepare("SELECT * FROM posts ORDER BY postId DESC LIMIT $offset,$showrecs");
+    $pdo_prepare->execute();
+    $result = $pdo_prepare->fetchAll();
+  } else {
+    $search = $_POST['search'];
+    $pdo_prepare = $pdo->prepare("SELECT * FROM posts WHERE content LIKE '%$search%' ORDER BY postId DESC");
+    $pdo_prepare->execute();
+    $raw_result = $pdo_prepare->fetchAll();
+
+    $total_pages = ceil(count($raw_result) / $showrecs);
+
+    $pdo_prepare = $pdo->prepare("SELECT * FROM posts WHERE content LIKE '%$search%' ORDER BY postId DESC LIMIT $offset,$showrecs");
+    $pdo_prepare->execute();
+    $result = $pdo_prepare->fetchAll();
+  }
 
 ?>
   <!-- Content Header (Page header) -->
@@ -90,11 +120,15 @@
           
             <div class="card-footer clearfix">
               <ul class="pagination pagination-sm m-0 float-right">
-                <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                <li class="page-item"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                <li class="page-item"><a class="page-link" href="?p=1"><i class='bx bx-chevrons-left'></i></a></li>
+                <li class="page-item <?php if($p <= 1){ echo 'disabled'; } ?>">
+                  <a class="page-link" href="<?php if($p <= 1){ echo '#'; }else{ echo '?p='.($p-1); } ?>"><i class='bx bxs-chevron-left' ></i></a>
+                </li>
+                <li class="page-item"><a class="page-link" href="#">C</a></li>
+                <li class="page-item <?php if($p >= $total_pages){ echo 'disabled'; } ?>">
+                  <a class="page-link" href="<?php if($p >= $total_pages){ echo '#'; }else{ echo '?p='.($p+1); } ?>"><i class='bx bxs-chevron-right' ></i></a>
+                </li>
+                <li class="page-item"><a class="page-link" href="?p=<?php echo $total_pages; ?>"><i class='bx bxs-chevrons-right' ></i></a></li>
               </ul>
             </div>
           </div>
