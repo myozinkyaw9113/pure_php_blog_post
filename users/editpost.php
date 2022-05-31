@@ -5,6 +5,11 @@
     $postprivacyconfig = require '../config/postprivacy.php';
     $postprivacyicon = require '../config/postprivacyicon.php';
 
+    # Select this user with SESSION['user_id']
+    $pdo_this_user = $pdo->prepare("SELECT * FROM users WHERE id=".$_SESSION['user_id']); 
+    $pdo_this_user->execute();
+    $thisUser = $pdo_this_user->fetch(PDO::FETCH_ASSOC);
+
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $id = $_POST['id'];
         $postprivacy = $_POST['postprivacy'];

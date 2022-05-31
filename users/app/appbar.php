@@ -217,7 +217,7 @@
                 alt="avatar"
                 style="width: 38px; height: 38px; object-fit: cover"
               />
-              <p class="m-0">John</p>
+              <p class="m-0"><?php echo $thisUser['name']; ?></p>
             </div>
             <!-- main menu -->
             <div
@@ -1490,7 +1490,7 @@
                   style="width: 45px; height: 45px; object-fit: cover"
                 />
                 <div>
-                  <p class="m-0">John</p>
+                  <p class="m-0"><?php echo $thisUser['name']; ?></p>
                   <p class="m-0 text-muted">See your profile</p>
                 </div>
               </li>

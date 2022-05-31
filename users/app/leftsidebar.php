@@ -28,7 +28,7 @@
                 />
                 </div>
                 <div>
-                <p class="m-0">John</p>
+                <p class="m-0"><?php echo $thisUser['name']; ?></p>
                 </div>
             </a>
             </li>

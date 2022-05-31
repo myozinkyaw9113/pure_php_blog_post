@@ -1,3 +1,6 @@
+<?php    
+    
+?>
     <!-- create post -->
     <div class="bg-white p-3 mt-3 rounded border shadow">
         <!-- avatar -->
@@ -48,7 +51,7 @@
             <!-- body -->
             <div class="modal-body">
                 <div class="my-1 p-1">
-                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" enctype="multipart/form-data">
+                    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" name="postForm" enctype="multipart/form-data">
 
                         <div class="d-flex flex-column">
                             <!-- name -->
@@ -189,7 +192,7 @@
                                     </div>
                                 </div>
                                 <input type="file" name="createImg" />
-                                <input type="submit" name="submit" value="Post" class="btn btn-primary w-100">
+                                <input type="submit" name="postSubmit" value="Post" class="btn btn-primary w-100">
                             </div>
                         </div>
                     </form>

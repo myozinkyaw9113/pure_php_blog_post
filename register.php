@@ -33,6 +33,31 @@
     if ($password != $c_password) {
       $confirmPassErr = '* Password and Confirm Password must be the same';
     }
+
+    $selectUser = $pdo->prepare("SELECT * FROM users WHERE email=:email");
+    $selectUser->bindValue(':email', $email);
+    $selectUser->execute();
+    $user = $selectUser->fetch(PDO::FETCH_ASSOC);
+
+    if ($user) {
+      echo '<script>alert("Current email is already exist");window.location.href="register.php";</script>';
+    } else {
+      $sql = "INSERT INTO users(name,email,password,c_password) 
+              VALUES(:name,:email,:password,:c_password)";
+      $stmt = $pdo->prepare($sql);
+      $result = $stmt->execute(
+        array(
+            ':name' => $name,
+            ':email'=> $email,
+            ':password'=> $password,
+            ':c_password'=> $c_password
+        )
+      );
+      if ($result) {
+        echo '<script>alert("Register success, Please login");window.location.href="login.php";</script>';
+      }
+    }
+
   }
 
   function test_input($data) {
