@@ -1,6 +1,7 @@
 <?php 
     session_start();
     require 'config/database.php';
+    require 'config/common.php';
 
     $email = $password = "";
     $emailErr = $passwordErr = $invalidUser = $incorrectPassword = "";
@@ -24,7 +25,7 @@
         $user = $selectUser->fetch(PDO::FETCH_ASSOC);
         
         if ($user) {
-            if ($password == $user['password'] && $password == $user['c_password'] ) {
+            if (password_verify($password, $user['password'])  && password_verify($password,$user['c_password'])) {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['logged_in'] = time();
                 if ($user['role'] === 1) {
@@ -78,7 +79,8 @@
 </div>
 <div class="card-body">
 <p class="login-box-msg">Sign in to start your session</p>
-<form action="login.php" method="POST">
+<form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST">
+<input name="_token" type="hidden" value="<?php echo $_SESSION['csrf_token']; ?>"> <!-- csrf_token --> 
 <div class="input-group mb-3">
     <input type="email" class="form-control" name="email" placeholder="Email">
     <div class="input-group-append">

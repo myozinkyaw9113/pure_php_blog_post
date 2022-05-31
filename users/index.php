@@ -2,6 +2,7 @@
     session_start();
     date_default_timezone_set("Asia/Rangoon");
     require '../config/database.php';
+    require '../config/common.php';
     $postprivacyconfig = require '../config/postprivacy.php';
     $postprivacyicon = require '../config/postprivacyicon.php';
 
@@ -25,12 +26,16 @@
     $pdo_all_comments->execute();
     $all_comments = $pdo_all_comments->fetchAll();
 
+    $pdo_cmt = $pdo->prepare("SELECT * FROM comments INNER JOIN posts ON comments.commentId = posts.postId");
+    $pdo_cmt->execute();
+    $result = $pdo_cmt->fetchAll();
     // print_r($all_comments);
     // exit();
 
     $content = $img = $comment = $needErr = "";
     
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
         if ($_POST['postSubmit']) {
             $postprivacy = $_POST['postprivacy'];
             $content = $_POST['content'];
@@ -170,14 +175,14 @@
                         style="width: 38px; height: 38px; object-fit: cover"
                         />
                         <div>
-                            <p class="m-0 fw-bold"><?php echo $thisUser['name']; ?></p>
+                            <p class="m-0 fw-bold"><?php echo escape($thisUser['name']); ?></p>
                             <span class="text-muted fs-7"> 
                                 <?php
-                                    echo $value['created_at'];
+                                    echo escape($value['created_at']);
                                     foreach ($postprivacyicon as $key => $privacyicon) {
                                         if ($value['postprivacy'] == $key) {
                                 ?>
-                                    <i style="font-size:1rem;font-weight:bolder" class="<?php echo $privacyicon;?> ml-3"></i>
+                                    <i style="font-size:1rem;font-weight:bolder" class="<?php echo escape($privacyicon);?> ml-3"></i>
                                 <?php
                                         }
                                     } 
@@ -205,7 +210,7 @@
                             d-flex
                             fs-7
                             "
-                            href="editpost.php?id=<?php echo $value['postId'] ?>"
+                            href="editpost.php?id=<?php echo escape($value['postId']) ?>"
                         >
                             Edit Post</a
                         >
@@ -217,7 +222,7 @@
                             d-flex
                             fs-7
                             "
-                            href="deletepost.php?id=<?php echo $value['postId'] ?>"
+                            href="deletepost.php?id=<?php echo escape($value['postId']) ?>"
                             onclick="return confirm('Are you sure you want to delete this post?');"
                         >
                             Delete Post</a
@@ -230,13 +235,13 @@
                     <!-- content -->
                     <div>
                         <p>
-                        <?php echo $value['content']; ?>
+                        <?php echo escape($value['content']); ?>
                         </p>
                         <?php 
                             if ($value['img'] != null) {
                         ?>
                         <img
-                        src="images/<?php echo $value['img']; ?>"
+                        src="images/<?php echo escape($value['img']); ?>"
                         alt="post image"
                         class="img-fluid rounded"
                         />   
@@ -278,14 +283,19 @@
                                     justify-content-end
                                     "
                                     data-bs-toggle="collapse"
-                                    data-bs-target="#collapsePost<?php echo $value['postId'] ?>"
+                                    data-bs-target="#collapsePost<?php echo escape($value['postId']) ?>"
                                     aria-expanded="false"
                                     aria-controls="collapsePost1"
                                 >
                                     <p class="m-0">
-                                        <?php
-                                            echo '1comment'
+                                        <?php 
+                                            foreach ($all_comments as $key => $comment) {
+                                                if ($value['postId'] == $comment['post_id']) {
+                                                    echo count($comment);
+                                                }
+                                            }
                                         ?>
+                                        
                                     </p> <!-- Counting Comments -->
                                 </div>
                                 </h2>
@@ -317,7 +327,7 @@
                                     text-muted
                                     "
                                     data-bs-toggle="collapse"
-                                    data-bs-target="#collapsePost<?php echo $value['postId'] ?>"
+                                    data-bs-target="#collapsePost<?php echo escape($value['postId']) ?>"
                                     aria-expanded="false"
                                     aria-controls="collapsePost1"
                                 >
@@ -327,7 +337,7 @@
                                 </div>
                                 <!-- comment expand -->
                                 <div
-                                id="collapsePost<?php echo $value['postId'] ?>"
+                                id="collapsePost<?php echo escape($value['postId']) ?>"
                                 class="accordion-collapse collapse"
                                 aria-labelledby="headingTwo"
                                 data-bs-parent="#accordionExample"
@@ -355,9 +365,9 @@
                                             />
                                             <!-- comment text -->
                                             <div class="rounded comment__input d-flex align-items-center gap-3">
-                                                <p class="fw-bold m-0"><?php echo $thisUser['name']; ?></p>
+                                                <p class="fw-bold m-0"><?php echo escape($thisUser['name']); ?></p>
                                                 <p class="m-0 fs-7 bg-gray p-2 rounded">
-                                                <?php echo $comment['content'] ?>
+                                                <?php echo escape($comment['content']) ?>
                                                 </p>
 
                                                 <!-- comment menu of author -->
@@ -418,6 +428,7 @@
                                     <!-- create comment -->
                                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" class="d-flex my-3 mt-3" method="POST">
                                     <!-- avatar -->
+                                    <input name="_token" type="hidden" value="<?php echo $_SESSION['csrf_token']; ?>"> <!-- csrf_token --> 
                                     <div>
                                         <img
                                         src="https://source.unsplash.com/collection/happy-people"

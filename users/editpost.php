@@ -2,6 +2,7 @@
     session_start();
     date_default_timezone_set("Asia/Rangoon");
     require '../config/database.php';
+    require '../config/common.php';
     $postprivacyconfig = require '../config/postprivacy.php';
     $postprivacyicon = require '../config/postprivacyicon.php';
 
@@ -92,7 +93,8 @@
             <div class="modal-body">
                 <div class="my-1 p-1">
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" enctype="multipart/form-data">
-                    <?php 
+                    <input name="_token" type="hidden" value="<?php echo $_SESSION['csrf_token']; ?>"> <!-- csrf_token --> 
+                   <?php 
                         foreach ($oldPost as $oldPostValue) {
                             # code...
                     ?>
@@ -122,7 +124,7 @@
                                         foreach($postprivacyconfig as $key => $value) {
                                     ?>
                                         <option value="<?php echo $key ?>" <?php if($key == $oldPostValue['postprivacy']) { echo 'selected'; } ?>>
-                                            <?php echo $value; ?>
+                                            <?php echo escape($value); ?>
                                         </option>
                                     <?php
                                         }
@@ -132,7 +134,7 @@
                             </div>
                             <!-- text -->
                             <div>
-                                <input type="hidden" name="id" value="<?php echo $oldPostValue['postId'] ?>">
+                                <input type="hidden" name="id" value="<?php echo escape($oldPostValue['postId']) ?>">
                                 <textarea
                                     name="content"
                                     cols="30"
@@ -140,7 +142,7 @@
                                     class="form-control border-0"
                                     style="border:none;outline:none;resize:none;font-size: 1.3rem;"
                                     placeholder=""
-                                ><?php echo $oldPostValue['content'] ?></textarea>
+                                ><?php echo escape($oldPostValue['content']) ?></textarea>
 
                                 <!-- emoji  -->
                                 <div
@@ -244,7 +246,7 @@
                                     <?php
                                         if ($oldPostValue['img'] != null) {
                                     ?>
-                                    <img src="images/<?php echo $oldPostValue['img'] ?>" style="width:auto;height:100px;" alt="">
+                                    <img src="images/<?php echo escape($oldPostValue['img']) ?>" style="width:auto;height:100px;" alt="">
                                     <?php
                                         }      
                                     ?>

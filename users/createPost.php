@@ -52,7 +52,7 @@
             <div class="modal-body">
                 <div class="my-1 p-1">
                     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="POST" name="postForm" enctype="multipart/form-data">
-
+                        <input name="_token" type="hidden" value="<?php echo $_SESSION['csrf_token']; ?>"> <!-- csrf_token --> 
                         <div class="d-flex flex-column">
                             <!-- name -->
                             <div class="d-flex align-items-center">
